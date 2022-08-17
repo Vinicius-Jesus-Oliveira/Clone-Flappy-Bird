@@ -33,6 +33,7 @@ class flappyBird extends spriteObj
     constructor(x, y, width, height, distanceFromLeft, distanceFromTop) {
         super(x, y, width, height, distanceFromLeft, distanceFromTop);
         
+        this.baseDistanceFromTop = distanceFromTop;
         this.gravity = 0.25;
         this.velocity = 0;
     }
@@ -43,27 +44,69 @@ class flappyBird extends spriteObj
     }
 }
 
-const flappyBird1 = new flappyBird(0, 0, 34, 24, 10, 50);
-const flappyBird2 = new flappyBird(0, 26, 34, 24, 10, 50);
-const flappyBird3 = new flappyBird(0, 52, 34, 24, 10, 50);
+const flappyBird1 = new flappyBird(0, 0, 34, 24, 45, canvas.offsetHeight / 3);
+const flappyBird2 = new flappyBird(0, 26, 34, 24, 45, canvas.offsetHeight / 3);
+const flappyBird3 = new flappyBird(0, 52, 34, 24, 45, canvas.offsetHeight / 3);
 const ground = new spriteObj(0, 610, 224, 112, 0, canvas.offsetHeight - 112);
 const background = new spriteObj(390, 0, 276, 204, 0, canvas.offsetHeight - 204);
+const startGame = new spriteObj(134, 0, 174, 152, canvas.offsetWidth / 2 - 87, canvas.offsetHeight / 5);
+
+class Screen
+{
+    render() {
+        canvasContext.fillStyle = '#70c5ce';
+        canvasContext.fillRect(0,0, canvas.width, canvas.height);
+
+        background.render();
+        background.render(true);
+
+        flappyBird1.render();
+        
+        ground.render();
+        ground.render(true);
+    }
+
+    update() {}
+}
+
+class StartScreen extends Screen
+{
+    render() {
+        super.render();
+        startGame.render();
+    }
+
+    click() {
+        changeScreen(gameScreen);
+    }
+}
+
+class GameScreen extends Screen
+{
+    update() {
+        flappyBird1.update();
+    }
+}
+
+const startScreen = new StartScreen();
+const gameScreen = new GameScreen();
+
+let activeScreen = startScreen;
+
+function changeScreen(screen) {
+    activeScreen = screen;
+}
 
 function gameLoop() {
-    canvasContext.fillStyle = '#70c5ce';
-    canvasContext.fillRect(0,0, canvas.width, canvas.height);
-
-    background.render();
-    background.render(true);
-
-    flappyBird1.render();
+    activeScreen.render();
+    activeScreen.update();
     
-    ground.render();
-    ground.render(true);
-
-    flappyBird1.update();
-
     requestAnimationFrame(gameLoop);
 }
+
+window.addEventListener("click", () => {
+    if (activeScreen.click)
+        activeScreen.click();
+});
 
 window.onload = gameLoop;
