@@ -28,16 +28,31 @@ class spriteObj
     }
 }
 
-const flappyBird1 = new spriteObj(0, 0, 34, 24, 10, 50);
-const flappyBird2 = new spriteObj(0, 26, 34, 24, 10, 50);
-const flappyBird3 = new spriteObj(0, 52, 34, 24, 10, 50);
+class flappyBird extends spriteObj
+{
+    constructor(x, y, width, height, distanceFromLeft, distanceFromTop) {
+        super(x, y, width, height, distanceFromLeft, distanceFromTop);
+        
+        this.gravity = 0.25;
+        this.velocity = 0;
+    }
+
+    update() {
+        this.velocity += this.gravity;
+        this.distanceFromTop += this.velocity;
+    }
+}
+
+const flappyBird1 = new flappyBird(0, 0, 34, 24, 10, 50);
+const flappyBird2 = new flappyBird(0, 26, 34, 24, 10, 50);
+const flappyBird3 = new flappyBird(0, 52, 34, 24, 10, 50);
 const ground = new spriteObj(0, 610, 224, 112, 0, canvas.offsetHeight - 112);
 const background = new spriteObj(390, 0, 276, 204, 0, canvas.offsetHeight - 204);
 
 function gameLoop() {
     canvasContext.fillStyle = '#70c5ce';
     canvasContext.fillRect(0,0, canvas.width, canvas.height);
-    
+
     background.render();
     background.render(true);
 
@@ -46,7 +61,7 @@ function gameLoop() {
     ground.render();
     ground.render(true);
 
-    flappyBird1.distanceFromTop += 1;
+    flappyBird1.update();
 
     requestAnimationFrame(gameLoop);
 }
