@@ -4,6 +4,15 @@ sprites.src = "./assets/flappy bird sprites.png";
 const canvas = document.getElementById("game-canva");
 const canvasContext = canvas.getContext("2d");
 
+const hit_sound = new Audio();
+hit_sound.src = "./assets/sounds/hit.wav";
+
+const fall_sound = new Audio();
+fall_sound.src = "./assets/sounds/fall.wav";
+
+const jump_sound = new Audio();
+jump_sound.src = "./assets/sounds/jump.wav";
+
 class spriteObj
 {
     constructor(x, y, width, height, distanceFromLeft, distanceFromTop) {
@@ -40,8 +49,10 @@ class FlappyBird extends spriteObj
     }
 
     update() {
-        if (this.crashOnGround())
-            changeScreen(startScreen);
+        if (this.crashOnGround()) {
+            hit_sound.play();
+            changeScreen(endScreen);
+        }
 
         this.velocity += this.gravity;
         this.distanceFromTop += this.velocity;
@@ -49,19 +60,20 @@ class FlappyBird extends spriteObj
 
     jump() {
         this.velocity -= this.jumpHeight;
-
+        jump_sound.play();
     }
 
     crashOnGround = () => ground.distanceFromTop - (this.distanceFromTop + this.height) <= 0;
 }
 
-var flappyBird, ground, background, startGame;
+var flappyBird, ground, background, startGame, endGame;
 
 function CreateInstances() {
     flappyBird = new FlappyBird(0, 0, 34, 24, 45, canvas.offsetHeight / 3);
     ground = new spriteObj(0, 610, 224, 112, 0, canvas.offsetHeight - 112);
     background = new spriteObj(390, 0, 276, 204, 0, canvas.offsetHeight - 204);
     startGame = new spriteObj(134, 0, 174, 152, canvas.offsetWidth / 2 - 87, canvas.offsetHeight / 5);
+    endGame = new spriteObj(134, 153, 226, 200, canvas.offsetWidth / 2 - 113, canvas.offsetHeight / 5);
 }
 
 CreateInstances();
@@ -112,8 +124,21 @@ class GameScreen extends Screen
     }
 }
 
+class EndScreen extends Screen
+{
+    render() {
+        super.render();
+        endGame.render();
+    }
+
+    click() {
+        changeScreen(startScreen);
+    }
+}
+
 const startScreen = new StartScreen();
 const gameScreen = new GameScreen();
+const endScreen = new EndScreen();
 
 let activeScreen = startScreen;
 
