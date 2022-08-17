@@ -28,7 +28,7 @@ class spriteObj
     }
 }
 
-class flappyBird extends spriteObj
+class FlappyBird extends spriteObj
 {
     constructor(x, y, width, height, distanceFromLeft, distanceFromTop) {
         super(x, y, width, height, distanceFromLeft, distanceFromTop);
@@ -36,20 +36,35 @@ class flappyBird extends spriteObj
         this.baseDistanceFromTop = distanceFromTop;
         this.gravity = 0.25;
         this.velocity = 0;
+        this.jumpHeight = 4.6;
     }
 
     update() {
+        if (this.crashOnGround())
+            changeScreen(startScreen);
+
         this.velocity += this.gravity;
         this.distanceFromTop += this.velocity;
     }
+
+    jump() {
+        this.velocity -= this.jumpHeight;
+
+    }
+
+    crashOnGround = () => ground.distanceFromTop - (this.distanceFromTop + this.height) <= 0;
 }
 
-const flappyBird1 = new flappyBird(0, 0, 34, 24, 45, canvas.offsetHeight / 3);
-const flappyBird2 = new flappyBird(0, 26, 34, 24, 45, canvas.offsetHeight / 3);
-const flappyBird3 = new flappyBird(0, 52, 34, 24, 45, canvas.offsetHeight / 3);
-const ground = new spriteObj(0, 610, 224, 112, 0, canvas.offsetHeight - 112);
-const background = new spriteObj(390, 0, 276, 204, 0, canvas.offsetHeight - 204);
-const startGame = new spriteObj(134, 0, 174, 152, canvas.offsetWidth / 2 - 87, canvas.offsetHeight / 5);
+var flappyBird, ground, background, startGame;
+
+function CreateInstances() {
+    flappyBird = new FlappyBird(0, 0, 34, 24, 45, canvas.offsetHeight / 3);
+    ground = new spriteObj(0, 610, 224, 112, 0, canvas.offsetHeight - 112);
+    background = new spriteObj(390, 0, 276, 204, 0, canvas.offsetHeight - 204);
+    startGame = new spriteObj(134, 0, 174, 152, canvas.offsetWidth / 2 - 87, canvas.offsetHeight / 5);
+}
+
+CreateInstances();
 
 class Screen
 {
@@ -60,17 +75,22 @@ class Screen
         background.render();
         background.render(true);
 
-        flappyBird1.render();
+        flappyBird.render();
         
         ground.render();
         ground.render(true);
     }
 
     update() {}
+    click() {}
 }
 
 class StartScreen extends Screen
 {
+    initialize() {
+        CreateInstances();
+    }
+
     render() {
         super.render();
         startGame.render();
@@ -84,7 +104,11 @@ class StartScreen extends Screen
 class GameScreen extends Screen
 {
     update() {
-        flappyBird1.update();
+        flappyBird.update();
+    }
+
+    click() {
+        flappyBird.jump();
     }
 }
 
@@ -95,6 +119,9 @@ let activeScreen = startScreen;
 
 function changeScreen(screen) {
     activeScreen = screen;
+
+    if (screen.initialize)
+        screen.initialize();
 }
 
 function gameLoop() {
@@ -104,9 +131,6 @@ function gameLoop() {
     requestAnimationFrame(gameLoop);
 }
 
-window.addEventListener("click", () => {
-    if (activeScreen.click)
-        activeScreen.click();
-});
+window.addEventListener("click", () => activeScreen.click());
 
 window.onload = gameLoop;
