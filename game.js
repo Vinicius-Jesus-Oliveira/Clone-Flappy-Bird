@@ -4,6 +4,8 @@ sprites.src = "./assets/flappy bird sprites.png";
 const canvas = document.getElementById("game-canva");
 const canvasContext = canvas.getContext("2d");
 
+let actualFrame = 0;
+
 const hit_sound = new Audio();
 hit_sound.src = "./assets/sounds/hit.wav";
 
@@ -46,6 +48,14 @@ class FlappyBird extends spriteObj
         this.gravity = 0.25;
         this.velocity = 0;
         this.jumpHeight = 4.6;
+
+        this.positions = [
+            { x: 0, y: 0 },
+            { x: 0, y: 26 },
+            { x: 0, y: 52 }
+        ];
+
+        this.actualPosition = 0;
     }
 
     update() {
@@ -64,13 +74,41 @@ class FlappyBird extends spriteObj
     }
 
     crashOnGround = () => ground.distanceFromTop - (this.distanceFromTop + this.height) <= 0;
+
+    animation() {
+        if (actualFrame % 12 === 0) {
+            if (this.actualPosition < this.positions.length - 1)
+                this.actualPosition++;
+            else
+                this.actualPosition = 0;
+
+            this.x = this.positions[this.actualPosition].x;
+            this.y = this.positions[this.actualPosition].y;
+        }
+    }
+}
+
+class Ground extends spriteObj
+{
+    constructor(x, y, width, height, distanceFromLeft, distanceFromTop) {
+        super(x, y, width, height, distanceFromLeft, distanceFromTop);
+        
+        this.velocity = 1;
+    }
+
+    update() {
+        if ((this.width * -0.5) >= this.distanceFromLeft)
+            this.distanceFromLeft = 0;
+
+        this.distanceFromLeft -= this.velocity;
+    }
 }
 
 var flappyBird, ground, background, startGame, endGame;
 
 function CreateInstances() {
     flappyBird = new FlappyBird(0, 0, 34, 24, 45, canvas.offsetHeight / 3);
-    ground = new spriteObj(0, 610, 224, 112, 0, canvas.offsetHeight - 112);
+    ground = new Ground(0, 610, 224, 112, 0, canvas.offsetHeight - 112);
     background = new spriteObj(390, 0, 276, 204, 0, canvas.offsetHeight - 204);
     startGame = new spriteObj(134, 0, 174, 152, canvas.offsetWidth / 2 - 87, canvas.offsetHeight / 5);
     endGame = new spriteObj(134, 153, 226, 200, canvas.offsetWidth / 2 - 113, canvas.offsetHeight / 5);
@@ -106,6 +144,8 @@ class StartScreen extends Screen
     render() {
         super.render();
         startGame.render();
+        ground.update();
+        flappyBird.animation();
     }
 
     click() {
@@ -115,8 +155,14 @@ class StartScreen extends Screen
 
 class GameScreen extends Screen
 {
+    render() {
+        super.render();
+        ground.update();
+    }
+
     update() {
         flappyBird.update();
+        flappyBird.animation();
     }
 
     click() {
@@ -153,6 +199,7 @@ function gameLoop() {
     activeScreen.render();
     activeScreen.update();
     
+    actualFrame++;
     requestAnimationFrame(gameLoop);
 }
 
