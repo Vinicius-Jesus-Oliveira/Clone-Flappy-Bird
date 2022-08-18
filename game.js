@@ -60,9 +60,8 @@ class FlappyBird extends spriteObj
     }
 
     update() {
-        if (this.crashOnGround()) {
+        if (this.crashOnGround() || this.crashOnPipe()) {
             hit_sound.play();
-            this.distanceFromTop = ground.distanceFromTop - this.height;
             changeScreen(endScreen);
         }
 
@@ -76,6 +75,22 @@ class FlappyBird extends spriteObj
     }
 
     crashOnGround = () => ground.distanceFromTop - (this.distanceFromTop + this.height) <= 0;
+
+    crashOnPipe() {
+        let crash = false;
+
+        pipes.forEach(pipe => {
+            const distanceToPipe = this.distanceFromLeft + this.width - pipe.distanceFromLeft;
+            const distanceFromPipe = this.distanceFromLeft - (pipe.distanceFromLeft + pipe.width);
+            
+            if (distanceToPipe > 2 && distanceFromPipe <= 0) {
+                if (this.distanceFromTop - (pipe.distanceFromTop + pipe.height) < 2 || (this.distanceFromTop + this.height) - pipe.secondPipeDistanceFromTop > 2)
+                    crash = true;
+            }
+        });
+
+        return crash;
+    }
 
     animation() {
         if (actualFrame % 12 === 0) {
@@ -127,7 +142,6 @@ class Pipes extends spriteObj
     }
 
     render() {
-        console.log(this.distanceFromTop);
         this.x = this.topX;
         this.y = this.topY;
         
@@ -135,9 +149,8 @@ class Pipes extends spriteObj
 
         this.x = this.bottomX;
         this.y = this.bottomY;
-        const secondPipeDistanceFromTop = this.height + this.distanceFromTop + this.distanceBetweenPipes;
         
-        super.render(false, secondPipeDistanceFromTop);
+        super.render(false, this.secondPipeDistanceFromTop);
     }
 
     update() {
@@ -149,10 +162,13 @@ class Pipes extends spriteObj
         this.distanceFromLeft -= this.velocity;
     }
 
-    changePosition = () => this.distanceFromTop = -175 * (Math.random() + 1);
+    changePosition() {
+        this.distanceFromTop = -175 * (Math.random() + 1);
+        this.secondPipeDistanceFromTop = this.height + this.distanceFromTop + this.distanceBetweenPipes;
+    }
 }
 
-var flappyBird, ground, background, startGame, endGame, pipe1, pipe2;
+var flappyBird, ground, background, startGame, endGame, pipes;
 
 function CreateInstances() {
     flappyBird = new FlappyBird(0, 0, 34, 24, 45, canvas.offsetHeight / 3);
@@ -160,13 +176,15 @@ function CreateInstances() {
     background = new spriteObj(390, 0, 276, 204, 0, canvas.offsetHeight - 204);
     startGame = new spriteObj(134, 0, 174, 152, canvas.offsetWidth / 2 - 87, canvas.offsetHeight / 5);
     endGame = new spriteObj(134, 153, 226, 200, canvas.offsetWidth / 2 - 113, canvas.offsetHeight / 5);
-    pipe1 = new Pipes(52, 169, 0, 169, 52, 400, canvas.offsetWidth + 50, -200);
-    pipe2 = new Pipes(52, 169, 0, 169, 52, 400, canvas.offsetWidth + 250, -200);
+    pipes = [
+        new Pipes(52, 169, 0, 169, 52, 400, canvas.offsetWidth + 50, -200),
+        new Pipes(52, 169, 0, 169, 52, 400, canvas.offsetWidth + 250, -200)
+    ];
 }
 
 CreateInstances();
 
-const renderPipes = () => [pipe1, pipe2].forEach(pipe => { pipe.render(); pipe.update(); });
+const renderPipes = () => pipes.forEach(pipe => { pipe.render(); pipe.update(); });
 
 class Screen
 {
@@ -179,7 +197,7 @@ class Screen
 
         flappyBird.render();
 
-        [pipe1, pipe2].forEach(pipe => { pipe.render(); })
+        pipes.forEach(pipe => { pipe.render(); })
         
         ground.render();
         ground.render(true);
@@ -211,7 +229,7 @@ class GameScreen extends Screen
 {
     render() {
         super.render();
-        [pipe1, pipe2].forEach(pipe => pipe.update());
+        pipes.forEach(pipe => pipe.update());
         flappyBird.update();
         flappyBird.animation();
         ground.update();
