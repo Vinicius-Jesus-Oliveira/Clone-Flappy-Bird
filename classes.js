@@ -270,8 +270,10 @@ class EndScreen extends Screen
         endGame.render();
         medal.render();
 
-        if (punctuation > maxPunctuation)
+        if (punctuation > maxPunctuation) {
             maxPunctuation = punctuation;
+            localStorage.setItem("flappyBird-maxPunctuation", maxPunctuation);
+        }
 
         writeFinalPunctuation();
     }
