@@ -156,8 +156,48 @@ class Pipes extends spriteObj
     }
 }
 
+class Medal extends spriteObj
+{
+    constructor(width, height, distanceFromLeft, distanceFromTop) {
+        super();
+        
+        this.width = width;
+        this.height = height;
+        this.distanceFromLeft = distanceFromLeft;
+        this.distanceFromTop = distanceFromTop;
+
+        this.positions = {
+            bronze: { x: 48, y: 124},
+            silver: { x: 48, y: 78},
+            gold: { x: 0, y: 124},
+            platinum: { x: 0, y: 78},
+        };
+    }
+
+    render() {
+        if (punctuation >= 30) {
+            this.x = this.positions.platinum.x;
+            this.y = this.positions.platinum.y;
+        }
+        else if (punctuation >= 20) {
+            this.x = this.positions.gold.x;
+            this.y = this.positions.gold.y;
+        }
+        else if (punctuation >= 10) {
+            this.x = this.positions.silver.x;
+            this.y = this.positions.silver.y;
+        }
+        else {
+            this.x = this.positions.bronze.x;
+            this.y = this.positions.bronze.y;
+        }
+
+        super.render();
+    }
+}
 
 
+// Screens
 class Screen
 {
     render() {
@@ -203,9 +243,12 @@ class GameScreen extends Screen
 {
     render() {
         super.render();
+
         pipes.forEach(pipe => pipe.update());
+
         flappyBird.update();
         flappyBird.animation();
+
         ground.update();
 
         canvasContext.font = "35px arial";
@@ -223,7 +266,9 @@ class EndScreen extends Screen
 {
     render() {
         super.render();
+
         endGame.render();
+        medal.render();
 
         if (punctuation > maxPunctuation)
             maxPunctuation = punctuation;

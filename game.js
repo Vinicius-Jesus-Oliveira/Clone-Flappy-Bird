@@ -15,7 +15,7 @@ fall_sound.src = "./assets/sounds/fall.wav";
 const jump_sound = new Audio();
 jump_sound.src = "./assets/sounds/jump.wav";
 
-var flappyBird, ground, background, startGame, endGame, pipes, punctuation = 0, maxPunctuation = 0;
+var flappyBird, ground, background, startGame, endGame, pipes, medal, punctuation = 0, maxPunctuation = 0;
 
 function CreateInstances() {
     flappyBird = new FlappyBird(0, 0, 34, 24, 45, canvas.offsetHeight / 3);
@@ -27,6 +27,7 @@ function CreateInstances() {
         new Pipes(52, 169, 0, 169, 52, 400, canvas.offsetWidth + 50, -200),
         new Pipes(52, 169, 0, 169, 52, 400, canvas.offsetWidth + 250, -200)
     ];
+    medal = new Medal(44, 44, 75, 183);
 }
 
 CreateInstances();
