@@ -15,7 +15,7 @@ fall_sound.src = "./assets/sounds/fall.wav";
 const jump_sound = new Audio();
 jump_sound.src = "./assets/sounds/jump.wav";
 
-var flappyBird, ground, background, startGame, endGame, pipes, scoreboard;
+var flappyBird, ground, background, startGame, endGame, pipes, punctuation = 0, maxPunctuation = 0;
 
 function CreateInstances() {
     flappyBird = new FlappyBird(0, 0, 34, 24, 45, canvas.offsetHeight / 3);
@@ -32,6 +32,21 @@ function CreateInstances() {
 CreateInstances();
 
 const renderPipes = () => pipes.forEach(pipe => { pipe.render(); pipe.update(); });
+
+function writeFinalPunctuation() {
+    canvasContext.font = "23px arial";
+    canvasContext.textAlign = "right";
+    canvasContext.fillStyle = "#FFFFFF";
+    canvasContext.lineWidth = 5;
+
+    const distanceFromLeft = canvas.offsetWidth - 70;
+
+    canvasContext.strokeText(punctuation, distanceFromLeft, 192);
+    canvasContext.fillText(punctuation, distanceFromLeft, 192);
+
+    canvasContext.strokeText(maxPunctuation, distanceFromLeft, 233);
+    canvasContext.fillText(maxPunctuation, distanceFromLeft, 233);
+}
 
 const startScreen = new StartScreen();
 const gameScreen = new GameScreen();
@@ -50,6 +65,14 @@ function gameLoop() {
     requestAnimationFrame(gameLoop);
 }
 
-window.addEventListener("click", () => activeScreen.click());
+window.addEventListener('click', () => {
+    if (activeScreen.constructor.name == "EndScreen")
+        activeScreen.click();
+});
+
+window.addEventListener('keydown', event => {
+    if ((event.code === "ArrowUp" || event.code === "Space") && (activeScreen.constructor.name == "StartScreen" || activeScreen.constructor.name == "GameScreen"))
+        activeScreen.click();
+});
 
 window.onload = gameLoop;

@@ -66,9 +66,14 @@ class FlappyBird extends spriteObj
             const distanceToPipe = this.distanceFromLeft + this.width - pipe.distanceFromLeft;
             const distanceFromPipe = this.distanceFromLeft - (pipe.distanceFromLeft + pipe.width);
             
-            if (distanceToPipe > 2 && distanceFromPipe <= 0) {
-                if (this.distanceFromTop - (pipe.distanceFromTop + pipe.height) < 2 || (this.distanceFromTop + this.height) - pipe.secondPipeDistanceFromTop > 2)
-                    crash = true;
+            if (distanceToPipe > 2) {
+                if (distanceFromPipe <= 0) {
+                    if (this.distanceFromTop - (pipe.distanceFromTop + pipe.height) < 2 || (this.distanceFromTop + this.height) - pipe.secondPipeDistanceFromTop > 2)
+                        crash = true;
+                }
+                else if (distanceFromPipe >= 42) {
+                    punctuation++;
+                }
             }
         });
 
@@ -185,6 +190,8 @@ class StartScreen extends Screen
         startGame.render();
         ground.update();
         flappyBird.animation();
+
+        punctuation = 0;
     }
 
     click() {
@@ -200,6 +207,11 @@ class GameScreen extends Screen
         flappyBird.update();
         flappyBird.animation();
         ground.update();
+
+        canvasContext.font = "35px arial";
+        canvasContext.textAlign = "right";
+        canvasContext.fillStyle = "#FFFFFF";
+        canvasContext.fillText(punctuation, canvas.offsetWidth - 10, 35);
     }
 
     click() {
@@ -212,6 +224,11 @@ class EndScreen extends Screen
     render() {
         super.render();
         endGame.render();
+
+        if (punctuation > maxPunctuation)
+            maxPunctuation = punctuation;
+
+        writeFinalPunctuation();
     }
 
     click() {
